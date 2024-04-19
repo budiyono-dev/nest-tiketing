@@ -4,7 +4,6 @@ import { ZodError } from "zod";
 @Catch(HttpException, ZodError)
 export class ErrorFilter implements ExceptionFilter {
     catch(exception: any, host: ArgumentsHost) {
-        console.log("error biasa");
         const res = host.switchToHttp().getResponse();
 
         if (exception instanceof ZodError) {
