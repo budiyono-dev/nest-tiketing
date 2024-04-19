@@ -15,18 +15,18 @@ datasource db {
 
 model User {
   id String @id @db.VarChar(100)
-  username String @db.VarChar(100)
+  username String @unique @db.VarChar(100)
   password String @db.VarChar(100)
   fullname String @db.VarChar(100)
-  email String @db.VarChar(100)
+  email String @unique @db.VarChar(100)
 
   @@map("users")
-  @@unique([username, email])
 }
 
 model Token {
   token String @id @db.VarChar(100)
   expired Int @db.Int
+  user_id String @db.VarChar(100)
 
   @@map("token")
 }
