@@ -58,6 +58,7 @@ export class UserService {
             password: request.password,
             username: request.username,
             email: request.email,
+            profile_picture: ''
         });
 
         return {
@@ -111,15 +112,17 @@ export class UserService {
         return this.tokenRepository.findToken(token);
     }
 
-    async uploadDp(userId: string, file: Express.Multer.File): Promise<void> {}
+    async uploadDp(userId: string, file: Express.Multer.File): Promise<void> {
+        const user = await this.userRepository.updateProfilePicture(userId, file.filename);
+        console.log(user);
+    }
 
-    async getDp(response: Response, filename: string): Promise<StreamableFile> {
-        response.headers.set('Content-Type', 'image/jpeg');
-
+    async getDp(userId: string): Promise<StreamableFile> {
+        const user = await this.userRepository.findByUserId(userId);
         const imageLocation = join(
             process.cwd(),
             'uploads',
-            '15c924f42ffaa67b3f14a5be05f0a312',
+            user.profile_picture,
         );
         const file = createReadStream(imageLocation);
         return new StreamableFile(file);

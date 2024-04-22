@@ -12,3 +12,22 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id String @id @db.VarChar(100)
+  username String @unique @db.VarChar(100)
+  password String @db.VarChar(100)
+  fullname String @db.VarChar(100)
+  email String @unique @db.VarChar(100)
+  profile_picture String @db.VarChar(100)
+
+  @@map("users")
+}
+
+model Token {
+  token String @id @db.VarChar(100)
+  expired Int @db.Int
+  user_id String @db.VarChar(100)
+
+  @@map("token")
+}

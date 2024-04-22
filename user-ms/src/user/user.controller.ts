@@ -11,6 +11,7 @@ import {
     Get,
     Res,
     StreamableFile,
+    Header,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiResponse } from 'src/model/response.model';
@@ -22,8 +23,8 @@ import {
 } from 'src/model/user.model';
 import { TokenInterceptor } from 'src/token/token.interceptor';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { join } from 'path';
-import { createReadStream } from 'fs';
+import { extname } from 'path';
+import { diskStorage } from 'multer';
 
 @Controller('/api/user')
 export class UserController {
@@ -56,13 +57,28 @@ export class UserController {
     async logout(@Headers('Authorization') token: string) {
         const res = await this.userService.logout(token);
         return {
-            data: `ini header ${token}`,
+            data: res,
+            code: 'S-001',
+            message: 'logout success',
         };
     }
 
     @Post('/display-picture')
     @UseInterceptors(TokenInterceptor)
-    @UseInterceptors(FileInterceptor('file'))
+    @UseInterceptors(FileInterceptor('file',{
+        storage: 
+            diskStorage({
+                destination: './uploads',
+                filename: function (req, file, callback) {
+                    const fileExt = extname(file.originalname);
+                    const baseName = file.originalname.replace(fileExt, '');
+                    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+                    const newFilename = `${baseName}-${uniqueSuffix}${fileExt}`;
+                    callback(null, newFilename);
+                  }
+            })
+        
+    }))
     async uploadProfilePicture(
         @Headers('Authorization') token: string,
         @UploadedFile(
@@ -75,22 +91,26 @@ export class UserController {
         )
         file: Express.Multer.File,
     ) {
-        file.destination = './uploads'
-        file.filename = 'uploads123.jpeg'
-        
         const tokenDB = await this.userService.getToken(token);
         const res = this.userService.uploadDp(tokenDB.user_id, file);
+        return {
+            data: res,
+            code: 'S-001',
+            message: 'update profile picture success',
+        };
     }
 
     @Get('/display-picture')
-    getUserProfilePhoto(
-        @Res({ passthrough: true }) res: Response
-    ): StreamableFile {
-
-        res.headers.set('Content-Type', 'image/jpeg');
-
-        const imageLocation = join(process.cwd(), 'uploads', '15c924f42ffaa67b3f14a5be05f0a312');
-        const file = createReadStream(imageLocation);
-        return new StreamableFile(file);
+    @UseInterceptors(TokenInterceptor)
+    @Header('Content-Type', 'image/jpeg')
+    async getUserProfilePhoto(
+        @Res({ passthrough: true }) res: Response,
+        @Headers('Authorization') token: string,
+    ): Promise<StreamableFile> {
+        console.log('get pd')
+        const tokenDB = await this.userService.getToken(token);
+        console.log(tokenDB)
+        const userId = tokenDB.user_id;
+        return await this.userService.getDp(userId);
     }
 }

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package app;
+
+service TiketService {
+    rpc Ping(Empty) returns (Hello) {};
+}
+
+message Hello {
+    string msg = 1;
+}
+
+message Empty {
+
+}

@@ -19,6 +19,7 @@ model User {
   password String @db.VarChar(100)
   fullname String @db.VarChar(100)
   email String @unique @db.VarChar(100)
+  profile_picture String @db.VarChar(100)
 
   @@map("users")
 }

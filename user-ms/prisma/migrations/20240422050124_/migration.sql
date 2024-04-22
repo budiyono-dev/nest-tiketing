@@ -5,6 +5,7 @@ CREATE TABLE `users` (
     `password` VARCHAR(100) NOT NULL,
     `fullname` VARCHAR(100) NOT NULL,
     `email` VARCHAR(100) NOT NULL,
+    `profile_picture` VARCHAR(100) NOT NULL,
 
     UNIQUE INDEX `users_username_key`(`username`),
     UNIQUE INDEX `users_email_key`(`email`),
